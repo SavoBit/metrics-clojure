@@ -10,6 +10,7 @@
   (when-let [metric (metric-map k (metric-map :other))]
     (mark! metric)))
 
+
 (defn instrument
   "Instrument a ring handler.
 
@@ -19,6 +20,8 @@
   ([handler]
    (instrument handler default-registry))
   ([handler ^MetricRegistry reg]
+   (instrument handler nil default-registry))
+  ([handler paths ^MetricRegistry reg]
    (let [active-requests (counter reg ["ring" "requests" "active"])
          requests (meter reg ["ring" "requests" "rate"])
          responses (meter reg ["ring" "responses" "rate"])
@@ -45,15 +48,26 @@
                           :options (meter reg ["ring" "requests" "rate.OPTIONS"])
                           :trace   (meter reg ["ring" "requests" "rate.TRACE"])
                           :connect (meter reg ["ring" "requests" "rate.CONNECT"])
-                          :other   (meter reg ["ring" "requests" "rate.OTHER"])}]
+                          :other   (meter reg ["ring" "requests" "rate.OTHER"])}
+         request-paths (if paths
+                         (into {} (map (fn [p]
+                                         [p
+                                          (meter reg
+                                                 ["ring" "requests"
+                                                  (str "api." p ".rate.GET")])])
+                                       paths))
+                         {})]
      (fn [request]
        (inc! active-requests)
        (try
          (let [request-method (:request-method request)
-               request-scheme (:scheme request)]
+               request-scheme (:scheme request)
+               request-path-info (:path-info request)]
            (mark! requests)
            (mark-in! request-methods request-method)
            (mark-in! schemes request-scheme)
+           (if paths
+             (mark-in! request-paths request-path-info))
            (let [resp (time! (times request-method (times :other))
                              (handler request))
                  ^{:tag "int"} status-code (or (:status resp) 404)]
