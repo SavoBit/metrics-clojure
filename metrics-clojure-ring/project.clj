@@ -1,4 +1,4 @@
-(defproject metrics-clojure-ring "2.6.0"
+(defproject metrics-clojure-ring "2.6.0-mist"
   :description "Various things gluing together metrics-clojure and ring."
   :url "https://github.com/sjl/metrics-clojure"
   :license {:name "MIT"}
