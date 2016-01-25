@@ -1,4 +1,8 @@
+<<<<<<< 91d3cbcd15ddbb34d5edb5e0dec677efd47e3738
 (defproject metrics-clojure "2.7.0-SNAPSHOT"
+=======
+(defproject org.clojars.prasincs/metrics-clojure "2.6.0"
+>>>>>>> mist versioning
   :description "A Clojure façade for Coda Hale's metrics library."
   :url "https://github.com/sjl/metrics-clojure"
   :license {:name "MIT"}
